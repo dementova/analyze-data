@@ -1,0 +1,4 @@
+en:
+  exceptions:
+    _0: 'Invalid error code'
+    _1: 'Incorrect file type. Choose CSV file'
