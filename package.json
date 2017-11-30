@@ -1,5 +1,15 @@
 {
   "name": "analyze-data",
   "private": true,
-  "dependencies": {}
+  "dependencies": {
+    "highcharts": "~6.0.3"
+  },
+  "description": "analyze-data",
+  "version": "0.0.1",
+  "main": "application.js",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/dementova/analyze-data.git"
+  },
+  "author": "Dementova Dasha"
 }

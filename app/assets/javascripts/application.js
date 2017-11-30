@@ -1,5 +1,3 @@
-//= require rails-ujs
 //= require turbolinks
-//= require jquery
-//= require highcharts
+//= require highcharts/highcharts
 //= require_tree .
