@@ -1,10 +1,8 @@
 class ChartsController < ApplicationController
-  def generate
-  	_safe_action do
-	  	data = _file_params
-	  	@result = ChartManager.generate data[:report]		
-	  	render :json => @result.to_json
-  	end
+  FILE = 'session_history.csv'
+
+  def index
+    @result = ChartManager.generate FILE
   end
 
   private

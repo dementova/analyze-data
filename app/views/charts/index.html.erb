@@ -1,12 +1,11 @@
 <h1>Analyze data</h1>
 
-<div class='msg-error'></div>
-
-<%= form_tag charts_generate_path, id: 'form-load', authenticity_token: true do %>
-	<%= file_field :file, :report, required: true, accept: '.csv' %>
-	<%= submit_tag 'Generate charts', class: 'btn-submit', data: { disable_with: false } %>
-<% end %>
-
 <div id='status' class='chart'></div>
 <div id='duration' class='chart'></div>
 <div id='outliers' class='chart'></div>
+
+<script type="text/javascript">
+	Chart.buildStatusChart( <%= @result.builds.to_json.html_safe %> )		
+	Chart.buildDurationByDateChart( <%= @result.durations.to_json.html_safe %> )		
+	Chart.buildOutliers( <%= @result.outliers.to_json.html_safe %> )		
+</script>

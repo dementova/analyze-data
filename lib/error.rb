@@ -2,7 +2,7 @@ class Error < Exception
 
 	DEFAULT_CODE = 0
 	CODES = {
-		incorrect_file: 1
+		file_not_exists: 1
 	}
 	
 	def initialize type

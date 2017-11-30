@@ -1,19 +1,17 @@
 require 'csv'
 
 class ChartManager
-	CONTENT_TYPE = "text/csv"
-
 	attr_reader :durations, :builds, :outliers
 
-	def self.generate report
-		new(report).define
+	def self.generate file
+		new(file).define
 	end
 
 	def initialize file
-		@file = file
-    @durations = {}
-    @builds = {}
-    @outliers = {}
+		@file 			= file
+    @durations 	= {}
+    @builds 		= {}
+    @outliers 	= {}
 	end
 
 	def define
@@ -25,11 +23,11 @@ class ChartManager
 
 	private
 	def _valid_file
-		raise Error.new(:incorrect_file) unless @file.content_type == CONTENT_TYPE
+		raise Error.new(:file_not_exists) unless File.exists?(@file)
 	end
 
 	def _parse_file
-    CSV.foreach(@file.tempfile, headers: true) do |row|
+    CSV.foreach(@file, headers: true) do |row|
     	date = row['created_at'].to_date
 
 			_set_duration_by_time( row['created_at'], row['duration'] )

@@ -15,7 +15,6 @@ class ApplicationController < ActionController::Base
         @result
       end
   	end
-
   end
 
 end
