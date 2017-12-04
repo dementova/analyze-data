@@ -1,7 +1,7 @@
 require 'csv'
 
 class ChartManager
-	attr_reader :durations, :builds, :outliers, :avr_duration
+	attr_reader :durations, :builds, :outliers
 
 	def self.generate file
 		new(file).define
@@ -40,10 +40,11 @@ class ChartManager
 	end
 
 	def _build_outliers
-		@avr_duration = @normal_durations.sum / @normal_durations.length
+		avr_duration = @normal_durations.sum / @normal_durations.length
 		@outliers.each do |date, durations|
 			sum = durations.inject(0){|s, d| s += (d - avr_duration)**2; s }
-			sigma = Math.sqrt( sum / durations.length )
+			sigma = Math.sqrt( sum / @normal_durations.length )
+			sigma = 3*sigma / @normal_durations.length
 			@outliers[date] = sigma.round(2)
 		end
 	end

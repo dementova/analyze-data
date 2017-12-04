@@ -47,9 +47,9 @@ var Chart = (function() {
     return result
   }
 
-  var _buildStatusChart = function(builds, outliers, avrDuration) {
+  var _buildStatusChart = function(builds, outliers) {
     builds = _formattingBuilds(builds);
-    outliers = _markingDeviation(outliers, 100); //define k=100
+    outliers = _markingDeviation(outliers, 1.8); //define k=1.8
     return Highcharts.chart('status', {
       chart: {
         zoomType: 'xy'
@@ -64,12 +64,7 @@ var Chart = (function() {
       yAxis: [{
         title: {
           text: 'Standard deviation of the arithmetic mean'
-        },
-        plotLines: [{
-          color: _avrDurationClr,
-          value: avrDuration,
-          width: 1
-        }]
+        }
       },{
         title: {
           text: 'Total amount builds'
