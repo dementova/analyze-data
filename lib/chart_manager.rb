@@ -1,7 +1,7 @@
 require 'csv'
 
 class ChartManager
-	attr_reader :durations, :builds, :outliers
+	attr_reader :durations, :builds, :outliers, :avr_duration
 
 	def self.generate file
 		new(file).define
@@ -12,6 +12,7 @@ class ChartManager
     @durations 	= {}
     @builds 		= {}
     @outliers 	= {}
+    @normal_durations = []
 	end
 
 	def define
@@ -29,26 +30,27 @@ class ChartManager
 	def _parse_file
     CSV.foreach(@file, headers: true) do |row|
     	date = row['created_at'].to_date
+    	duration = row['duration'].to_f
 
-			_set_duration_by_time( row['created_at'], row['duration'] )
+			_set_duration_by_time( row['created_at'], duration )
 			_set_status_by_date( date, row['summary_status'] )
-			_set_duration_by_date( date, row['duration'] )
+			_set_duration_by_date( date, duration )
+			_set_avr_normal_duration( duration, row['summary_status'] )
     end
 	end
 
 	def _build_outliers
+		@avr_duration = @normal_durations.sum / @normal_durations.length
 		@outliers.each do |date, durations|
-			length = durations.length
-			a = durations.sum/length
-			sum = durations.inject(0){|s, d| s += (d - a)**2; s }
-			sigma = Math.sqrt( sum/length )
+			sum = durations.inject(0){|s, d| s += (d - avr_duration)**2; s }
+			sigma = Math.sqrt( sum / durations.length )
 			@outliers[date] = sigma.round(2)
 		end
 	end
 
 	def _set_duration_by_time time_str, duration
 		time = time_str.to_time.to_s(:db)
-		@durations[time] = duration.to_f
+		@durations[time] = duration
 	end
 
 	def _set_status_by_date time, status
@@ -59,7 +61,11 @@ class ChartManager
 
 	def _set_duration_by_date time, duration
 		@outliers[time] ||= []
-		@outliers[time].push(duration.to_f)
+		@outliers[time].push(duration)
+	end
+
+	def _set_avr_normal_duration duration, status
+		@normal_durations.push( duration ) if status == 'passed'
 	end
 
 end

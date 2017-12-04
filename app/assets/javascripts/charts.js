@@ -6,8 +6,10 @@ var Chart = (function() {
     error: '#ef2821'
   }
 
-  var _formatting_builds = function(items) {
-    var date, dates, series;
+  var _avrDurationClr = 'rgba(68, 170, 213, .4)';
+
+  var _formattingBuilds = function(items) {
+    var dates, series;
     dates = [];
     series = {
       passed: [],
@@ -15,7 +17,7 @@ var Chart = (function() {
       failed: [],
       error: []
     };
-    for (date in items) {
+    for (var date in items) {
       dates.push(date);
       series.passed.push(items[date].passed || 0);
       series.stopped.push(items[date].stopped || 0);
@@ -28,54 +30,117 @@ var Chart = (function() {
     };
   }
 
-  var _buildStatusChart = function(builds) {
-    var data = _formatting_builds(builds);
+  var _markingDeviation = function(outliers, abnormal) {
+    var result, point;
+    result = [];
+    for (date in outliers){
+      point = { y: outliers[date] }
+      if(outliers[date] >= abnormal){
+        point.marker = {
+          lineWidth: 2,
+          fillColor: 'red',
+          lineColor: 'red'
+        }
+      }
+      result.push( point )
+    }
+    return result
+  }
+
+  var _buildStatusChart = function(builds, outliers, avrDuration) {
+    builds = _formattingBuilds(builds);
+    outliers = _markingDeviation(outliers, 100); //define k=100
     return Highcharts.chart('status', {
       chart: {
-        type: 'column'
+        zoomType: 'xy'
       },
       title: {
         text: 'Passing and failing builds per day'
       },
       xAxis: {
-        categories: data.dates
+        categories: builds.dates,
+        crosshair: true   
       },
-      yAxis: {
-        min: 0,
+      yAxis: [{
+        title: {
+          text: 'Standard deviation of the arithmetic mean'
+        },
+        plotLines: [{
+          color: _avrDurationClr,
+          value: avrDuration,
+          width: 1
+        }]
+      },{
         title: {
           text: 'Total amount builds'
-        }
-      },
+        },
+        opposite: true        
+      }],
       legend: {
         align: 'right',
         verticalAlign: 'top'
       },
       tooltip: {
-        headerFormat: '<b>{point.x}</b><br/>',
-        pointFormat: '{series.name}: {point.y}<br/>Total: {point.stackTotal}'
+        shared: true
       },
       plotOptions: {
         column: {
           stacking: 'normal'
-        }
+        },
+        series: {
+          animation: {
+            duration: 2000
+          }
+        },
       },
       series: [
         {
           name: 'Passed',
-          data: data.series.passed,
+          type: 'column',
+          yAxis: 1,
+          tooltip: {
+            headerFormat: '<b>{point.x}</b><br/>',
+            pointFormat: '{series.name}: {point.y} / {point.stackTotal} <br>'
+          },
+          data: builds.series.passed,
           color: _statusClr.passed
-        }, {
+        },{
           name: 'Stopped',
-          data: data.series.stopped,
+          type: 'column',
+          yAxis: 1,
+          tooltip: {
+            headerFormat: '<b>{point.x}</b><br/>',
+            pointFormat: '{series.name}: {point.y} / {point.stackTotal} <br>'
+          },
+          data: builds.series.stopped,
           color: _statusClr.stopped
-        }, {
+        },{
           name: 'Failed',
-          data: data.series.failed,
+          type: 'column',
+          yAxis: 1,
+          tooltip: {
+            headerFormat: '<b>{point.x}</b><br/>',
+            pointFormat: '{series.name}: {point.y} / {point.stackTotal} <br>'
+          },
+          data: builds.series.failed,
           color: _statusClr.failed
-        }, {
+        },{
           name: 'Error',
-          data: data.series.error,
+          type: 'column',
+          yAxis: 1,
+          tooltip: {
+            headerFormat: '<b>{point.x}</b><br/>',
+            pointFormat: '{series.name}: {point.y} / {point.stackTotal} <br>'
+          },
+          data: builds.series.error,
           color: _statusClr.error
+        },{
+          name: 'test',
+          type: 'spline',
+          data: outliers,
+          tooltip: {
+            pointFormat: '{point.y}'
+          }
         }
       ]
     });
@@ -109,6 +174,11 @@ var Chart = (function() {
       plotOptions: {
         areaspline: {
           fillOpacity: 0.5
+        },
+        series: {
+          animation: {
+            duration: 2000
+          }
         }
       },
       series: [

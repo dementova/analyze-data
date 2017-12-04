@@ -5,7 +5,11 @@
 <div id='outliers' class='chart'></div>
 
 <script type="text/javascript">
-	Chart.buildStatusChart( <%= @result.builds.to_json.html_safe %> )		
+	Chart.buildStatusChart( 
+		<%= @result.builds.to_json.html_safe %>, 
+		<%= @result.outliers.to_json.html_safe %>, 
+		<%= @result.avr_duration %>
+	)		
 	Chart.buildDurationByDateChart( <%= @result.durations.to_json.html_safe %> )		
 	Chart.buildOutliers( <%= @result.outliers.to_json.html_safe %> )		
 </script>
