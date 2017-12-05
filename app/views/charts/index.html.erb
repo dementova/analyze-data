@@ -2,7 +2,6 @@
 
 <div id='status' class='chart'></div>
 <div id='duration' class='chart'></div>
-<div id='outliers' class='chart'></div>
 
 <script type="text/javascript">
 	Chart.buildStatusChart( 
@@ -10,5 +9,4 @@
 		<%= @result.outliers.to_json.html_safe %>
 	)		
 	Chart.buildDurationByDateChart( <%= @result.durations.to_json.html_safe %> )		
-	Chart.buildOutliers( <%= @result.outliers.to_json.html_safe %> )		
 </script>

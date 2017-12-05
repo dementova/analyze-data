@@ -30,26 +30,18 @@ var Chart = (function() {
     };
   }
 
-  var _markingDeviation = function(outliers, abnormal) {
+  var _markingDeviation = function(outliers) {
     var result, point;
     result = [];
     for (date in outliers){
-      point = { y: outliers[date] }
-      if(outliers[date] >= abnormal){
-        point.marker = {
-          lineWidth: 2,
-          fillColor: 'red',
-          lineColor: 'red'
-        }
-      }
-      result.push( point )
+      result.push({ y: outliers[date] })
     }
     return result
   }
 
   var _buildStatusChart = function(builds, outliers) {
     builds = _formattingBuilds(builds);
-    outliers = _markingDeviation(outliers, 1.8); //define k=1.8
+    outliers = _markingDeviation(outliers);
     return Highcharts.chart('status', {
       chart: {
         zoomType: 'xy'
@@ -185,48 +177,9 @@ var Chart = (function() {
     });
   }
 
-  var _buildOutliers = function(outliers) {
-    return Highcharts.chart('outliers', {
-      chart: {
-        type: 'areaspline'
-      },
-      title: {
-        text: 'Outliers'
-      },
-      xAxis: {
-        categories: Object.keys(outliers),
-        title: {
-          text: 'Created_at'
-        }
-      },
-      yAxis: {
-        title: {
-          text: 'Standard deviation of the arithmetic mean'
-        }
-      },
-      legend: {
-        enabled: false
-      },
-      tooltip: {
-        pointFormat: '{point.y}'
-      },
-      plotOptions: {
-        areaspline: {
-          fillOpacity: 0.5
-        }
-      },
-      series: [
-        {
-          data: Object.values(outliers)
-        }
-      ]
-    });
-  }
-    
   return {
     buildStatusChart : _buildStatusChart,
-    buildDurationByDateChart : _buildDurationByDateChart,
-    buildOutliers : _buildOutliers
+    buildDurationByDateChart : _buildDurationByDateChart
   }
 
 })();

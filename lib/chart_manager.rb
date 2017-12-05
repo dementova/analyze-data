@@ -13,12 +13,14 @@ class ChartManager
     @builds 		= {}
     @outliers 	= {}
     @normal_durations = []
+    @average 		= 0
 	end
 
 	def define
 		_valid_file
 		_parse_file
-		_build_outliers
+		_define_average
+		_define_deviation
 		self
 	end
 
@@ -39,12 +41,16 @@ class ChartManager
     end
 	end
 
-	def _build_outliers
-		avr_duration = @normal_durations.sum / @normal_durations.length
+	def _define_average
+		@average = @normal_durations.sum / @normal_durations.count
+	end
+
+	def _define_deviation
+		count = @normal_durations.count
 		@outliers.each do |date, durations|
-			sum = durations.inject(0){|s, d| s += (d - avr_duration)**2; s }
-			sigma = Math.sqrt( sum / @normal_durations.length )
-			sigma = 3*sigma / @normal_durations.length
+			sum_x = durations.inject(0){|sum, x| sum += (x - @average)**2; sum }
+			sigma = Math.sqrt( sum_x / count )
+			sigma = 3*sigma / count
 			@outliers[date] = sigma.round(2)
 		end
 	end
