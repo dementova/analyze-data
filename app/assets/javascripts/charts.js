@@ -122,7 +122,7 @@ var Chart = (function() {
           data: builds.series.error,
           color: _statusClr.error
         },{
-          name: 'test',
+          name: 'Deviations',
           type: 'spline',
           data: outliers,
           tooltip: {
