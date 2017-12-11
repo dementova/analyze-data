@@ -1,7 +1,7 @@
 require 'csv'
 
 class ChartManager
-	attr_reader :durations, :builds, :outliers
+	attr_reader :durations, :builds, :deviations
 
 	def self.generate file
 		new(file).define
@@ -11,16 +11,15 @@ class ChartManager
 		@file 			= file
     @durations 	= {}
     @builds 		= {}
-    @outliers 	= {}
-    @normal_durations = []
-    @average 		= 0
+    @deviations	= {}
+    @tests 			= {}
 	end
 
 	def define
 		_valid_file
 		_parse_file
-		_define_average
-		_define_deviation
+		_define_deviation_by_duration
+		_define_deviation_by_tests
 		self
 	end
 
@@ -32,47 +31,46 @@ class ChartManager
 	def _parse_file
     CSV.foreach(@file, headers: true) do |row|
     	date = row['created_at'].to_date
+			time = row['created_at'].to_time.to_s(:db)
     	duration = row['duration'].to_f
 
-			_set_duration_by_time( row['created_at'], duration )
+			_set_duration_by_time( time, duration )
+			_set_tests_by_time( time, row['passed_tests_count'] )
 			_set_status_by_date( date, row['summary_status'] )
-			_set_duration_by_date( date, duration )
-			_set_avr_normal_duration( duration, row['summary_status'] )
     end
 	end
 
-	def _define_average
-		@average = @normal_durations.sum / @normal_durations.count
+	def _define_deviation_by_duration
+		@deviations[:by_duration] = _set_deviation_date( @durations )
 	end
 
-	def _define_deviation
-		count = @normal_durations.count
-		@outliers.each do |date, durations|
-			sum_x = durations.inject(0){|sum, x| sum += (x - @average)**2; sum }
-			sigma = Math.sqrt( sum_x / count )
-			sigma = 3*sigma / count
-			@outliers[date] = sigma.round(2)
+	def _define_deviation_by_tests
+		@deviations[:by_test] = _set_deviation_date( @tests )
+	end
+
+	def _set_deviation_date data
+		date = [] 
+		res = Deviation.define( data.values )
+		data.each do |t, d| 
+			if ( d - res.average ).abs > res.deviation
+				date.push( t.to_date )
+			end
 		end
+		date
 	end
 
-	def _set_duration_by_time time_str, duration
-		time = time_str.to_time.to_s(:db)
+	def _set_duration_by_time time, duration
 		@durations[time] = duration
+	end
+
+	def _set_tests_by_time time, tests
+		@tests[time] = tests.to_i
 	end
 
 	def _set_status_by_date time, status
 		@builds[time] ||= {}
 		@builds[time][status] ||= 0
 		@builds[time][status] += 1
-	end
-
-	def _set_duration_by_date time, duration
-		@outliers[time] ||= []
-		@outliers[time].push(duration)
-	end
-
-	def _set_avr_normal_duration duration, status
-		@normal_durations.push( duration ) if status == 'passed'
 	end
 
 end

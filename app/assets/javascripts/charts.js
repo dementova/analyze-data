@@ -6,7 +6,10 @@ var Chart = (function() {
     error: '#ef2821'
   }
 
-  var _avrDurationClr = 'rgba(68, 170, 213, .4)';
+  var _deviationClr = {
+    both: '#ef2821',
+    one: '#ff9570'
+  }
 
   var _formattingBuilds = function(items) {
     var dates, series;
@@ -30,45 +33,42 @@ var Chart = (function() {
     };
   }
 
-  var _markingDeviation = function(outliers) {
-    var result, point;
-    result = [];
-    for (date in outliers){
-      result.push({ y: outliers[date] })
-    }
-    return result
-  }
-
-  var _buildStatusChart = function(builds, outliers) {
+  var _buildStatusChart = function(builds, deviations) {
     builds = _formattingBuilds(builds);
-    outliers = _markingDeviation(outliers);
     return Highcharts.chart('status', {
       chart: {
-        zoomType: 'xy'
+        type: 'column'
       },
       title: {
         text: 'Passing and failing builds per day'
       },
       xAxis: {
         categories: builds.dates,
-        crosshair: true   
-      },
-      yAxis: [{
-        title: {
-          text: 'Standard deviation of the arithmetic mean'
+        labels: {
+          formatter: function () {
+            if (deviations.by_test.indexOf(this.value) != -1 && deviations.by_duration.indexOf(this.value) != -1) {
+              return '<span style="fill: '+_deviationClr.both+';">' + this.value + '</span>';
+            } else if(deviations.by_duration.indexOf(this.value) != -1) {
+              return '<span style="fill: '+_deviationClr.one+';">' + this.value + '</span>';
+            } else {
+              return this.value;
+            }
+          }
         }
-      },{
+      },
+      yAxis: {
         title: {
           text: 'Total amount builds'
-        },
-        opposite: true        
-      }],
+        }
+      },
       legend: {
         align: 'right',
         verticalAlign: 'top'
       },
       tooltip: {
-        shared: true
+        shared: true,
+        headerFormat: '<b>{point.x}</b><br/>',
+        pointFormat: '{series.name}: {point.y} / {point.stackTotal} <br>'
       },
       plotOptions: {
         column: {
@@ -83,51 +83,20 @@ var Chart = (function() {
       series: [
         {
           name: 'Passed',
-          type: 'column',
-          yAxis: 1,
-          tooltip: {
-            headerFormat: '<b>{point.x}</b><br/>',
-            pointFormat: '{series.name}: {point.y} / {point.stackTotal} <br>'
-          },
           data: builds.series.passed,
           color: _statusClr.passed
         },{
           name: 'Stopped',
-          type: 'column',
-          yAxis: 1,
-          tooltip: {
-            headerFormat: '<b>{point.x}</b><br/>',
-            pointFormat: '{series.name}: {point.y} / {point.stackTotal} <br>'
-          },
           data: builds.series.stopped,
           color: _statusClr.stopped
         },{
           name: 'Failed',
-          type: 'column',
-          yAxis: 1,
-          tooltip: {
-            headerFormat: '<b>{point.x}</b><br/>',
-            pointFormat: '{series.name}: {point.y} / {point.stackTotal} <br>'
-          },
           data: builds.series.failed,
           color: _statusClr.failed
         },{
           name: 'Error',
-          type: 'column',
-          yAxis: 1,
-          tooltip: {
-            headerFormat: '<b>{point.x}</b><br/>',
-            pointFormat: '{series.name}: {point.y} / {point.stackTotal} <br>'
-          },
           data: builds.series.error,
           color: _statusClr.error
-        },{
-          name: 'Deviations',
-          type: 'spline',
-          data: outliers,
-          tooltip: {
-            pointFormat: '{point.y}'
-          }
         }
       ]
     });
