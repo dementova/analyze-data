@@ -17,6 +17,10 @@ class Deviation
 	end
 
 	private
+	def _valid_data
+		raise Error.new(:data_not_exists) unless @data.count.zero?
+	end
+
 	def _define_average
 		@average = @data.sum / @data.count
 	end

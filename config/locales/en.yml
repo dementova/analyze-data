@@ -2,3 +2,4 @@ en:
   exceptions:
     _0: 'Invalid error code'
     _1: 'File not exists'
+    _2: 'Data empty'

@@ -2,7 +2,8 @@ class Error < Exception
 
 	DEFAULT_CODE = 0
 	CODES = {
-		file_not_exists: 1
+		file_not_exists: 1,
+		data_not_exists: 2
 	}
 	
 	def initialize type
